@@ -4,6 +4,8 @@ import com.tuempresa.vencimientos.model.Producto;
 import com.tuempresa.vencimientos.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,18 +17,30 @@ public class ProductoController {
 
     @Autowired
     private ProductoRepository productoRepository;
-//crear productos
+
+    // Crear producto
     @PostMapping
     public Producto crearProducto(@RequestBody Producto producto) {
         producto.setId(UUID.randomUUID());
         return productoRepository.save(producto);
     }
-//listar productos
+
+    // Listar productos
     @GetMapping
     public List<Producto> listarProductos() {
         return productoRepository.findAll();
     }
-//para actualizar productos
+
+    // Obtener producto por ID
+    @GetMapping("/{id}")
+    public Producto obtenerProductoPorId(@PathVariable UUID id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Producto no encontrado con id: " + id
+                ));
+    }
+
+    // Actualizar producto
     @PutMapping("/{id}")
     public Producto actualizarProducto(@PathVariable UUID id, @RequestBody Producto productoActualizado) {
         return productoRepository.findById(id).map(producto -> {
@@ -36,16 +50,19 @@ public class ProductoController {
             producto.setDescuentoAplicado(productoActualizado.isDescuentoAplicado());
             producto.setPrecioConDescuento(productoActualizado.getPrecioConDescuento());
             return productoRepository.save(producto);
-        }).orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+        }).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Producto no encontrado con id: " + id
+        ));
     }
-//para eliminar productos
+
+    // Eliminar producto
     @DeleteMapping("/{id}")
     public String eliminarProducto(@PathVariable UUID id) {
         productoRepository.deleteById(id);
         return "Producto eliminado con ID: " + id;
     }
-
 }
+
 
 
 
