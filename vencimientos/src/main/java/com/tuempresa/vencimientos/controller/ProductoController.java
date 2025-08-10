@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,24 @@ public class ProductoController {
     public List<Producto> listarProductos() {
         return productoRepository.findAll();
     }
+
+    // Listar productos próximos a vencer (3 días antes)
+    @GetMapping("/proximos-vencer")
+    public List<Producto> productosProximosAVencer() {
+        LocalDate hoy = LocalDate.now();
+        LocalDate limite = hoy.plusDays(5); // Cambia "3" por la cantidad de días que quieras
+
+        return productoRepository.findAll().stream()
+                .filter(p -> {
+                    LocalDate fechaVenc = p.getFechaVencimiento();
+                    return fechaVenc != null &&
+                            (fechaVenc.isEqual(hoy) ||
+                                    (fechaVenc.isAfter(hoy) && fechaVenc.isBefore(limite.plusDays(1))));
+                })
+                .toList();
+    }
+
+
 
     // Obtener producto por ID
     @GetMapping("/{id}")

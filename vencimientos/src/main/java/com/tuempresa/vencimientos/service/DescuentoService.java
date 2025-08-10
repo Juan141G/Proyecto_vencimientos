@@ -57,7 +57,7 @@ public class DescuentoService {
 
 
 
-    @Scheduled(cron = "0 0 * * * *") // cada hora en punto
+    @Scheduled(fixedRate = 60000) // cada hora en punto
     public void ejecutarDescuentosPeriodicamente() {
         System.out.println("⏰ Ejecutando descuentos automáticos programados...");
         aplicarDescuentosAutomaticamente();
